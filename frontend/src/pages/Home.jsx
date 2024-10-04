@@ -13,7 +13,7 @@ function Home() {
           answer: userInput
         });
         
-        navigate('/result', { state: { result: response.data } });
+        navigate('/resultDisplay', { state: { result: response.data } });
     } catch (error) {
       console.error('Error:', error);
       // Handle errors (e.g., show error message to user)

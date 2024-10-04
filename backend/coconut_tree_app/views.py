@@ -1,11 +1,11 @@
-from django.shortcuts import render
-from django.http import HttpResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from django.core import serializers
 from django.db.models import F
 from .models import UserInput
+from django.core import serializers
+from django.shortcuts import render
+from django.http import HttpResponse
 
 def send_the_homepage(request):
     print('home')
@@ -32,11 +32,15 @@ def user_answer(request):
             # Refresh from db to get the updated count
             input_entry.refresh_from_db()
 
+            # Get top 100 inputs ordered by count
+            top_inputs = UserInput.objects.order_by('-count')[:100].values('input_text', 'count')
+
             return Response({
                 'status': 'success',
                 'message': 'Answer received and processed',
                 'input': input_entry.input_text,
-                'count': input_entry.count
+                'count': input_entry.count,
+                'top_inputs': list(top_inputs)
             }, status=status.HTTP_200_OK)
 
         except Exception as e:
