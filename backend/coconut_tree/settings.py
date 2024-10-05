@@ -23,9 +23,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-(k!^e7)sahaxeiz6%!*rv6(65(-%i-k%czepmofxs=0pk%fi)7'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['coconut-tree.2masterlight.site']
+
+CSRF_TRUSTED_ORIGINS = ['coconut-tree.2masterlight.site']
 
 
 # Application definition
