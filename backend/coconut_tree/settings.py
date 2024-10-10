@@ -24,10 +24,8 @@ SECRET_KEY = 'django-insecure-(k!^e7)sahaxeiz6%!*rv6(65(-%i-k%czepmofxs=0pk%fi)7
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-
-ALLOWED_HOSTS = ['coconut-tree.2masterlight.site']
-
-CSRF_TRUSTED_ORIGINS = ['coconut-tree.2masterlight.site']
+ALLOWED_HOSTS = ['coconut-tree.2masterlight.site', 'www.coconut-tree.2masterlight.site']
+# CSRF_TRUSTED_ORIGINS = ['coconut-tree.2masterlight.site']
 
 
 # Application definition
@@ -123,6 +121,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+
+# For production so Nginx server can serve it
+STATIC_ROOT = '/var/www/coconut_tree/static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
