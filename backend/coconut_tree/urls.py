@@ -19,5 +19,8 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',include('coconut_tree_app.urls')),
+    path('', include('coconut_tree_app.urls')),
+    path('users/', include('users.urls')),
+    path('accounts/', include('django.contrib.auth.urls')), 
+    path('printful/', include('printful_integration.urls')),
 ]

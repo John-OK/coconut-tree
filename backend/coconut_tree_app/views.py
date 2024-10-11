@@ -7,7 +7,7 @@ from django.core import serializers
 from django.shortcuts import render
 from django.http import HttpResponse
 
-def send_the_homepage(request):
+def homepage(request):
     print('home')
     theIndex = open('static/index.html').read()
     return HttpResponse(theIndex)

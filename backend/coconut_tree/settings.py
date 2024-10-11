@@ -16,7 +16,7 @@ import os
 
 load_dotenv()
 
-
+PRINTFUL_API_TOKEN = os.getenv('PRINTFUL_API_TOKEN')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'coconut_tree_app',
+    'printful_integration',
     'users',
 ]
 
@@ -56,6 +57,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 ROOT_URLCONF = 'coconut_tree.urls'
 
@@ -88,8 +91,7 @@ DATABASES = {
     }
 }
 
-AUTH_USER_MODEL = 'users.AppUser'
-
+AUTH_USER_MODEL = 'users.CustomUser'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -108,6 +110,9 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+LOGIN_REDIRECT_URL = 'coconut_tree_app:homepage'
+LOGOUT_REDIRECT_URL = 'coconut_tree_app:homepage'
 
 
 # Internationalization
