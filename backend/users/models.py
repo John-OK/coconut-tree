@@ -8,8 +8,10 @@ class CustomUser(AbstractUser):
         unique=True,
     )
 
+    # 'username' is required here for the admin panel, for deployment
+    # it should be removed, leaving an empty list
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = [] # Email & Password are required by default.
+    REQUIRED_FIELDS = ['username'] # Email & Password are required by default.
 
 class AnonymousUserData(models.Model):
     session_key = models.CharField(max_length=40, unique=True)

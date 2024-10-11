@@ -1,3 +1,6 @@
 from django.contrib import admin
+from .models import CustomUser, AnonymousUserData, FormSubmission
 
-# Register your models here.
+admin.site.register(CustomUser)
+admin.site.register(AnonymousUserData)
+admin.site.register(FormSubmission)
