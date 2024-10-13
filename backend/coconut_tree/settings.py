@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'coconut_tree_app',
+    'printful_integration',
     'users',
 ]
 

@@ -4,11 +4,16 @@ import axios from 'axios';
 import './App.css'
 import Home from './pages/Home'
 import ResultDisplay from './pages/ResultDisplay'
+import Navbar from './components/Navbar';
+import SignInModal from './components/SignInModal';
+import SignUpModal from './components/SignUpModal';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isSignInModalOpen, setIsSignInModalOpen] = useState(false);
+  const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -38,6 +43,41 @@ function App() {
     if (parts.length === 2) return parts.pop().split(';').shift();
   };
 
+  const handleSignIn = async (email, password) => {
+    try {
+      const response = await axios.post('/api/login/', { email, password });
+      setIsAuthenticated(true);
+      setUser(response.data.user);
+      setIsSignInModalOpen(false);
+    } catch (error) {
+      console.error('Sign in failed:', error);
+      // Handle error (e.g., show error message)
+    }
+  };
+
+  const handleSignUp = async (email, password) => {
+    try {
+      const response = await axios.post('/api/register/', { email, password });
+      setIsAuthenticated(true);
+      setUser(response.data.user);
+      setIsSignUpModalOpen(false);
+    } catch (error) {
+      console.error('Sign up failed:', error);
+      // Handle error (e.g., show error message)
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await axios.post('/api/logout/');
+      setIsAuthenticated(false);
+      setUser(null);
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Handle error (e.g., show error message)
+    }
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -45,11 +85,26 @@ function App() {
   return (
     <Router>
       <div className="App">
-        {/* Add a navbar component here */}
+        <Navbar 
+          isAuthenticated={isAuthenticated}
+          onSignIn={() => setIsSignInModalOpen(true)}
+          onSignUp={() => setIsSignUpModalOpen(true)}
+          onLogout={handleLogout}
+        />
         <Routes>
           <Route path="/" element={<Home isAuthenticated={isAuthenticated} user={user} />} />
           <Route path="/resultDisplay" element={<ResultDisplay />} />
         </Routes>
+        <SignInModal 
+          isOpen={isSignInModalOpen}
+          onClose={() => setIsSignInModalOpen(false)}
+          onSignIn={handleSignIn}
+        />
+        <SignUpModal 
+          isOpen={isSignUpModalOpen}
+          onClose={() => setIsSignUpModalOpen(false)}
+          onSignUp={handleSignUp}
+        />
       </div>
     </Router>
   );

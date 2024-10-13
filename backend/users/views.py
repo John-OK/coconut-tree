@@ -6,6 +6,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from .models import AppUser, FormSubmission, SessionData
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth import logout as auth_logout
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -72,5 +73,5 @@ class RegisterView(APIView):
 
 class LogoutView(APIView):
     def post(self, request):
-        logout(request)
+        auth_logout(request)
         return Response({'message': 'User logged out successfully'}, status=status.HTTP_200_OK)
