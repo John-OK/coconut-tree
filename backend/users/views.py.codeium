@@ -1,0 +1,97 @@
+from django.contrib.auth import authenticate, login, logout
+
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.views import APIView
+from .models import AppUser
+from django.contrib.auth.hashers import make_password
+# from django.http import HttpResponse
+# from .models import FormData
+
+# class TempFormSubmissionView(APIView):
+#     def post(self, request):
+#         form_data = request.data
+#         temp_submission = TempFormSubmission.objects.create(form_data=form_data)
+#         request.session['temp_submission_id'] = temp_submission.id
+#         # store_form_data(request, form_data)
+#         return Response({'message': 'Form submission saved'})
+
+class TempFormSubmissionView(APIView):
+    def post(self, request):
+        form_data = request.data
+        user_id = request.user.id if request.user.is_authenticated else None
+        form_submission = FormSubmission.objects.create(user_id=user_id, form_data=form_data)
+        request.session['temp_submission_id'] = form_submission.id
+        return Response({'message': 'Form submission saved'})
+
+class LoginView(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+        if not email or not password:
+            return Response({'error': 'Email and password are required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = authenticate(email=email, password=password)
+        if user is None:
+            return Response({'error': 'Invalid email or password'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Store the temp_submission ID in the session if it exists
+        if 'temp_submission_id' in request.session:
+            temp_submission_id = request.session['temp_submission_id']
+            # Log the user in
+            login(request, user)
+            # Associate the temporary form submission with the logged-in user
+            temp_submission = TempFormSubmission.objects.get(id=temp_submission_id)
+            temp_submission.user = user
+            temp_submission.save()
+            # Remove the temp_submission ID from the session
+            del request.session['temp_submission_id']
+        else:
+            # Log the user in
+            login(request, user)
+
+        # Store the form data in the database
+        form_data = request.data
+        form_submission = FormSubmission(user=user, form_data=form_data)
+        form_submission.save()
+
+        return Response({'message': 'User logged in successfully'}, status=status.HTTP_200_OK)
+
+class RegisterView(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+        if not email or not password:
+            return Response({'error': 'Email and password are required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if AppUser.objects.filter(email=email).exists():
+            return Response({'error': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if there is a temporary form submission in the session
+        if 'temp_submission_id' in request.session:
+            temp_submission_id = request.session['temp_submission_id']
+            # Create a new user with the provided email and password
+            user = AppUser.objects.create_user(email=email, password=make_password(password))
+            # Associate the temporary form submission with the newly created user
+            temp_submission = TempFormSubmission.objects.get(id=temp_submission_id)
+            temp_submission.user = user
+            temp_submission.save()
+            # Remove the temp_submission ID from the session
+            del request.session['temp_submission_id']
+        else:
+            # Create a new user with the provided email and password
+            user = AppUser.objects.create_user(email=email, password=make_password(password))
+
+        # Log the user in
+        login(request, user)
+        return Response({'message': 'User created successfully'}, status=status.HTTP_201_CREATED)
+
+
+# def store_form_data(request, form_data):
+#     if request.user.is_authenticated:
+#         user = request.user
+#         FormData.objects.create(user=user, form_data=form_data)
+#     else:
+#         anonymous_user_data = AnonymousUserData.objects.get(session_key=request.session.session_key)
+#         FormData.objects.create(anonymous_user=anonymous_user_data, form_data=form_data)
+#     return HttpResponse('Form data stored successfully')

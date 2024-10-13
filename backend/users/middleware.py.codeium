@@ -1,0 +1,117 @@
+import secrets
+from django.contrib.sessions.backends.db import SessionStore
+
+def generate_token(length=32):
+    return secrets.token_urlsafe(length)
+
+class SessionRestoreMiddleware:
+    def process_request(self, request):
+        token = request.COOKIES.get('session_token')
+        if token:
+            session_store = SessionStore()
+            session_data = session_store.get(token)
+            if session_data:
+                # Restore the session
+                request.session = session_data
+                # Remove the token from the session store
+                # session_store.delete(token)
+                # Associate session data with user's account if authenticated
+                if request.user.is_authenticated:
+                    self.associate_session_data_with_user(request, session_data)
+        else:
+            # Generate a new token and store it in the session store
+            token = generate_token()
+            request.session['session_token'] = token
+            session_store = SessionStore(token)
+            session_store.save()
+            # Set a cookie with the token in the response
+            response = HttpResponse()
+            response.set_cookie('session_token', token, secure=True, httponly=True, max_age=3600)
+            return response
+
+        # if 'temp_submission_id' in request.session and request.user.is_authenticated:
+        #     # Retrieve the stored temp_submission instance
+        #     temp_submission = TempFormSubmission.objects.get(id=request.session['temp_submission_id'])
+        #     # Associate the temp_submission with the user's account
+        #     temp_submission.user = request.user
+        #     temp_submission.save()
+        #     # Remove the temp_submission ID from the session
+        #     del request.session['temp_submission_id']
+
+        # if request.user.is_authenticated:
+        #     # Associate the session data with the user's account
+        #     user = request.user
+        #     session_data, created = SessionData.objects.get_or_create(user=user)
+        #     session_data.session_data = request.session
+        #     session_data.save()
+        # else:
+        #     # Store the session data in the session store
+        #     request.session['anonymous_session_id'] = generate_token()
+
+
+    # def associate_session_data_with_user(self, request, session_data):
+    #     if request.user.is_authenticated:
+    #         try:
+    #             anonymous_user_data = AnonymousUserData.objects.get(session_key=request.session.session_key)
+    #         except AnonymousUserData.DoesNotExist:
+    #             anonymous_user_data = AnonymousUserData(session_key=request.session.session_key)
+    #             anonymous_user_data.save()
+
+    #         # Update the anonymous user data with the session data
+    #         anonymous_user_data.save()
+
+    #         # Associate the anonymous user data with the user's account
+    #         user = request.user
+    #         user.anonymous_user_data = anonymous_user_data
+    #         user.save()
+
+    # def associate_session_data_with_user(self, request, session_data):
+    #     if request.user.is_authenticated:
+    #         session_data_instance, created = SessionData.objects.get_or_create(user=request.user)
+    #     else:
+    #         session_data_instance, created = SessionData.objects.get_or_create(anonymous_user=AnonymousUserData.objects.get(session_key=request.session.session_key))
+    #     session_data_instance.session_data = session_data
+    #     session_data_instance.save()
+
+    def associate_session_data_with_user(self, request, session_data):
+        user = request.user
+        form_submission, created = FormSubmission.objects.get_or_create(user=user)
+        form_submission.session_data = session_data
+        form_submission.save()
+
+
+class AnonymousSessionMiddleware:
+    def process_request(self, request):
+        token = request.COOKIES.get('session_token')
+        if token:
+            session_store = SessionStore()
+            session_data = session_store.get(token)
+            if session_data:
+                # Restore the session
+                request.session = session_data
+                # Remove the token from the session store
+                session_store.delete(token)
+                # Store the session data in the database associated with a unique identifier
+                anonymous_user_data, created = AnonymousUserData.objects.get_or_create(session_key=request.session.session_key)
+                anonymous_user_data.session_data = request.session
+                anonymous_user_data.save()
+                # Check if the user is authenticated
+                if request.user.is_authenticated:
+                    # Associate the session data with the user's account
+                    user = AppUser.objects.get(id=request.session.get('user_id'))
+                    user.session_data = request.session
+                    user.save()
+                else:
+                    # Store the session data in the session store
+                    request.session['anonymous_session_id'] = session_data.get('anonymous_session_id')
+        else:
+            # Generate a new token and store it in the session store
+            token = generate_token()
+            request.session['session_token'] = token
+            session_store = SessionStore(token)
+            session_store.save()
+            # Set a cookie with the token in the response
+            response = HttpResponse()
+            response.set_cookie('session_token', token, secure=True, httponly=True, max_age=3600)
+            return response
+

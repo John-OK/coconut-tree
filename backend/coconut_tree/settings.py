@@ -50,6 +50,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'backend.users.middleware.AnonymousSessionMiddleware',
+    'backend.users.middleware.SessionRestoreMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -74,6 +76,17 @@ TEMPLATES = [
         },
     },
 ]
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_NAME = 'session_token'
+SESSION_COOKIE_SECURE = True  # Use only with HTTPS
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_AGE = 3600  # 1 hour in seconds
+# SESSION_COOKIE_SAMESITE = 'Lax'
+# SESSION_COOKIE_AGE = 604800 # one week; set to 86400 for one day
+
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = 'Lax'
 
 WSGI_APPLICATION = 'coconut_tree.wsgi.application'
 
