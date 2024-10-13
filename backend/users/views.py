@@ -4,9 +4,39 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from .models import AppUser, FormSubmission, SessionData
+from .models import AppUser, FormSubmission, SessionData, AnonymousUserData
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import logout as auth_logout
+
+class FormSubmissionView(APIView):
+    def post(self, request):
+        form_data = request.data
+        
+        if request.user.is_authenticated:
+            # For authenticated users
+            form_submission = FormSubmission.objects.create(
+                user=request.user,
+                form_data=form_data
+            )
+        else:
+            # For unauthenticated users
+            session_token = request.COOKIES.get('session_token')
+            if session_token:
+                session_data = SessionData.objects.get(token=session_token)
+                anonymous_user = session_data.anonymous_user
+                if not anonymous_user:
+                    anonymous_user = AnonymousUserData.objects.create(session_key=request.session.session_key)
+                    session_data.anonymous_user = anonymous_user
+                    session_data.save()
+                
+                form_submission = FormSubmission.objects.create(
+                    anonymous_user=anonymous_user,
+                    form_data=form_data
+                )
+            else:
+                return Response({'error': 'No session found'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({'message': 'Form submission saved', 'id': form_submission.id}, status=status.HTTP_201_CREATED)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

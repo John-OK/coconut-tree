@@ -9,10 +9,12 @@ function Home({ isAuthenticated, user }) {
 
     const handleSubmit = async () => {
       try {
-        const response = await axios.post('/api/user_answer', {
+        const response = await axios.post('/api/submit-form/', {
           answer: userInput
+        }, {
+          withCredentials: true // This ensures cookies are sent with the request
         });
-
+        
         navigate('/resultDisplay', { state: { result: response.data } });
       } catch (error) {
         console.error('Error:', error);
