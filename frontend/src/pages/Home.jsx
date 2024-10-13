@@ -3,29 +3,34 @@ import '../App.css'
 import axios from "axios"
 import { useNavigate } from 'react-router-dom';
 
-function Home() {
+function Home({ isAuthenticated, user }) {
     const [userInput, setUserInput] = useState("");
     const navigate = useNavigate();
-  
+
     const handleSubmit = async () => {
       try {
-        const response = await axios.post('/user_answer', {
+        const response = await axios.post('/api/user_answer', {
           answer: userInput
         });
-        
+
         navigate('/resultDisplay', { state: { result: response.data } });
-    } catch (error) {
-      console.error('Error:', error);
-      // Handle errors (e.g., show error message to user)
+      } catch (error) {
+        console.error('Error:', error);
+        // Handle errors (e.g., show error message to user)
       }
     };
-  
-  
+
     return (
       <div className="Home">
         <h1>Who trumps Trump?</h1>
         <h1>What trumps Trump?</h1>
-        
+
+        {isAuthenticated ? (
+          <p>Welcome, {user.email}!</p>
+        ) : (
+          <p>Please log in to save your submissions.</p>
+        )}
+
         <h1>
         <form >
           <input
