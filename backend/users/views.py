@@ -1,3 +1,5 @@
+import random
+import string
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.response import Response
 from rest_framework import status
@@ -57,27 +59,50 @@ class LoginView(APIView):
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
-
+        
         if not email or not password:
             return Response({'error': 'Email and password are required'}, status=status.HTTP_400_BAD_REQUEST)
-
-        user = authenticate(email=email, password=password)
-
+        
+        user = authenticate(request, username=email, password=password)
+        
         if user is None:
             return Response({'error': 'Invalid email or password'}, status=status.HTTP_401_UNAUTHORIZED)
-
+        
         login(request, user)
-
-        # Associate the session data with the logged-in user
-        session_data = SessionData.objects.get(token=request.COOKIES.get('session_token'))
+        
+        # Get or create SessionData
+        session_token = request.COOKIES.get('session_token')
+        if session_token:
+            session_data, created = SessionData.objects.get_or_create(token=session_token)
+        else:
+            # If no session token, create a new one
+            session_data = SessionData.objects.create(token=generate_token())
+        
+        # Update session data
         session_data.user = user
         session_data.anonymous_user = None
         session_data.save()
+        
+        # Transfer any anonymous submissions to the logged-in user
+        if not created:
+            FormSubmission.objects.filter(anonymous_user__session_key=request.session.session_key).update(user=user, anonymous_user=None)
+        
+        response = Response({
+            'message': 'User logged in successfully',
+            'user': {
+                'id': user.id,
+                'email': user.email
+            }
+        }, status=status.HTTP_200_OK)
+        
+        # Set the session token cookie if it doesn't exist
+        if not session_token:
+            response.set_cookie('session_token', session_data.token, httponly=True, secure=True)
+        
+        return response
 
-        # Transfer any form submissions from anonymous user to authenticated user
-        FormSubmission.objects.filter(anonymous_user__session_key=request.session.session_key).update(user=user, anonymous_user=None)
-
-        return Response({'message': 'User logged in successfully'}, status=status.HTTP_200_OK)
+def generate_token():
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=32))
 
 class RegisterView(APIView):
     def post(self, request):
