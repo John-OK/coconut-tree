@@ -29,19 +29,13 @@ class FormSubmissionView(APIView):
                         anonymous_user = AnonymousUserData.objects.create(session_key=request.session.session_key)
                         session_data.anonymous_user = anonymous_user
                         session_data.save()
-                except SessionData.DoesNotExist:
-                    # If SessionData doesn't exist, create a new one
-                    anonymous_user = AnonymousUserData.objects.create(session_key=request.session.session_key)
-                    session_data = SessionData.objects.create(
-                        token=session_token,
-                        session_data=request.session.session_key,
-                        anonymous_user=anonymous_user
+                    
+                    form_submission = FormSubmission.objects.create(
+                        anonymous_user=anonymous_user,
+                        form_data=form_data
                     )
-                
-                form_submission = FormSubmission.objects.create(
-                    anonymous_user=anonymous_user,
-                    form_data=form_data
-                )
+                except SessionData.DoesNotExist:
+                    return Response({'error': 'Invalid session'}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response({'error': 'No session found'}, status=status.HTTP_400_BAD_REQUEST)
         
@@ -89,26 +83,42 @@ class RegisterView(APIView):
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
-
+        
         if not email or not password:
             return Response({'error': 'Email and password are required'}, status=status.HTTP_400_BAD_REQUEST)
-
+        
         if AppUser.objects.filter(email=email).exists():
             return Response({'error': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
-
+        
+        # Create a new user
         user = AppUser.objects.create_user(email=email, password=password)
+        
+        # Log the user in
         login(request, user)
-
-        # Associate the session data with the newly registered user
-        session_data = SessionData.objects.get(token=request.COOKIES.get('session_token'))
-        session_data.user = user
-        session_data.anonymous_user = None
-        session_data.save()
-
-        # Transfer any form submissions from anonymous user to the new authenticated user
-        FormSubmission.objects.filter(anonymous_user__session_key=request.session.session_key).update(user=user, anonymous_user=None)
-
-        return Response({'message': 'User created successfully'}, status=status.HTTP_201_CREATED)
+        
+        # Transfer session data and form submissions
+        session_token = request.COOKIES.get('session_token')
+        if session_token:
+            try:
+                session_data = SessionData.objects.get(token=session_token)
+                anonymous_user = session_data.anonymous_user
+                
+                if anonymous_user:
+                    # Transfer form submissions
+                    FormSubmission.objects.filter(anonymous_user=anonymous_user).update(user=user, anonymous_user=None)
+                    
+                    # Update session data
+                    session_data.user = user
+                    session_data.anonymous_user = None
+                    session_data.save()
+                    
+                    # Delete the anonymous user data
+                    anonymous_user.delete()
+                
+            except SessionData.DoesNotExist:
+                pass  # No session data to transfer
+        
+        return Response({'message': 'User created successfully and session data transferred'}, status=status.HTTP_201_CREATED)
 
 class LogoutView(APIView):
     def post(self, request):

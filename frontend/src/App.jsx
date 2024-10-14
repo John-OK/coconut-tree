@@ -20,7 +20,7 @@ function App() {
       const sessionToken = getCookie('session_token');
       if (sessionToken) {
         try {
-          const response = await axios.get('/api/check-session/', {
+          const response = await axios.get('users/api/check-session/', {
             headers: {
               'X-Session-Token': sessionToken
             }
@@ -45,7 +45,7 @@ function App() {
 
   const handleSignIn = async (email, password) => {
     try {
-      const response = await axios.post('/api/login/', { email, password });
+      const response = await axios.post('/users/api/login/', { email, password });
       setIsAuthenticated(true);
       setUser(response.data.user);
       setIsSignInModalOpen(false);
@@ -57,7 +57,7 @@ function App() {
 
   const handleSignUp = async (email, password) => {
     try {
-      const response = await axios.post('/api/register/', { email, password });
+      const response = await axios.post('/users/api/register/', { email, password });
       setIsAuthenticated(true);
       setUser(response.data.user);
       setIsSignUpModalOpen(false);
@@ -69,7 +69,7 @@ function App() {
 
   const handleLogout = async () => {
     try {
-      await axios.post('/api/logout/');
+      await axios.post('/users/api/logout/');
       setIsAuthenticated(false);
       setUser(null);
     } catch (error) {
