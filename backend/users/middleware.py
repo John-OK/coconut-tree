@@ -16,7 +16,7 @@ class SessionRestoreMiddleware:
             try:
                 session_data = SessionData.objects.get(token=token)
                 request.session = SessionStore(session_data.session_data)
-                if request.user.is_authenticated:
+                if hasattr(request, 'user') and request.user.is_authenticated:
                     self.associate_session_data_with_user(request, session_data)
             except SessionData.DoesNotExist:
                 token = self.create_new_session(request)
@@ -41,7 +41,7 @@ class SessionRestoreMiddleware:
         return token
 
     def associate_session_data_with_user(self, request, session_data):
-        if request.user.is_authenticated:
+        if hasattr(request, 'user') and request.user.is_authenticated:
             session_data.user = request.user
             session_data.anonymous_user = None
             session_data.save()
