@@ -72,11 +72,14 @@ class LoginView(APIView):
         
         # Get or create SessionData
         session_token = request.COOKIES.get('session_token')
+        created = False
         if session_token:
             session_data, created = SessionData.objects.get_or_create(token=session_token)
         else:
             # If no session token, create a new one
-            session_data = SessionData.objects.create(token=generate_token())
+            session_token = generate_token()
+            session_data = SessionData.objects.create(token=session_token)
+            created = True
         
         # Update session data
         session_data.user = user
@@ -95,9 +98,8 @@ class LoginView(APIView):
             }
         }, status=status.HTTP_200_OK)
         
-        # Set the session token cookie if it doesn't exist
-        if not session_token:
-            response.set_cookie('session_token', session_data.token, httponly=True, secure=True)
+        # Set the session token cookie
+        response.set_cookie('session_token', session_token, httponly=True, secure=True)
         
         return response
 
