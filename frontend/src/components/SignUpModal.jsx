@@ -1,4 +1,3 @@
-// src/components/SignUpModal.jsx
 import React, { useState } from 'react';
 
 const SignUpModal = ({ isOpen, onClose, onSignUp }) => {

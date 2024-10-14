@@ -32,16 +32,15 @@ class SessionRestoreMiddleware:
         session_store = SessionStore()
         session_store.create()
         request.session = session_store
-        anonymous_user = AnonymousUserData.objects.create(session_key=session_store.session_key)
         SessionData.objects.create(
             token=token,
             session_data=session_store.session_key,
-            anonymous_user=anonymous_user
+            anonymous_user=AnonymousUserData.objects.create(session_key=session_store.session_key)
         )
         return token
 
     def associate_session_data_with_user(self, request, session_data):
-        if request.user.is_authenticated:
+        if session_data.anonymous_user:
             session_data.user = request.user
             session_data.anonymous_user = None
             session_data.save()

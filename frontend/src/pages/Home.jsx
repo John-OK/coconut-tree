@@ -9,7 +9,7 @@ function Home({ isAuthenticated, user }) {
 
     const handleSubmit = async () => {
       try {
-        const response = await axios.post('/api/submit-form/', {
+        const response = await axios.post('users/api/submit-form/', {
           answer: userInput
         }, {
           withCredentials: true // This ensures cookies are sent with the request

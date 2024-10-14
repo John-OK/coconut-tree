@@ -22,21 +22,12 @@ class FormSubmissionView(APIView):
             # For unauthenticated users
             session_token = request.COOKIES.get('session_token')
             if session_token:
-                try:
-                    session_data = SessionData.objects.get(token=session_token)
-                    anonymous_user = session_data.anonymous_user
-                    if not anonymous_user:
-                        anonymous_user = AnonymousUserData.objects.create(session_key=request.session.session_key)
-                        session_data.anonymous_user = anonymous_user
-                        session_data.save()
-                except SessionData.DoesNotExist:
-                    # If SessionData doesn't exist, create a new one
+                session_data = SessionData.objects.get(token=session_token)
+                anonymous_user = session_data.anonymous_user
+                if not anonymous_user:
                     anonymous_user = AnonymousUserData.objects.create(session_key=request.session.session_key)
-                    session_data = SessionData.objects.create(
-                        token=session_token,
-                        session_data=request.session.session_key,
-                        anonymous_user=anonymous_user
-                    )
+                    session_data.anonymous_user = anonymous_user
+                    session_data.save()
                 
                 form_submission = FormSubmission.objects.create(
                     anonymous_user=anonymous_user,
