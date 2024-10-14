@@ -118,7 +118,14 @@ class RegisterView(APIView):
             except SessionData.DoesNotExist:
                 pass  # No session data to transfer
         
-        return Response({'message': 'User created successfully and session data transferred'}, status=status.HTTP_201_CREATED)
+        # Return user data along with the success message
+        return Response({
+            'message': 'User created successfully and session data transferred',
+            'user': {
+                'id': user.id,
+                'email': user.email
+            }
+        }, status=status.HTTP_201_CREATED)
 
 class LogoutView(APIView):
     def post(self, request):

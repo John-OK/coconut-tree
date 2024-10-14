@@ -1,11 +1,18 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import '../App.css'
 import axios from "axios"
 import { useNavigate } from 'react-router-dom';
 
 function Home({ isAuthenticated, user }) {
     const [userInput, setUserInput] = useState("");
+    const [currentUser, setCurrentUser] = useState(null);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (isAuthenticated && user) {
+            setCurrentUser(user);
+        }
+    }, [isAuthenticated, user]);
 
     const handleSubmit = async () => {
       try {
@@ -27,8 +34,8 @@ function Home({ isAuthenticated, user }) {
         <h1>Who trumps Trump?</h1>
         <h1>What trumps Trump?</h1>
 
-        {isAuthenticated ? (
-          <p>Welcome, {user.email}!</p>
+        {isAuthenticated && currentUser ? (
+          <p>Welcome, {currentUser.email}!</p>
         ) : (
           <p>Please log in to save your submissions.</p>
         )}

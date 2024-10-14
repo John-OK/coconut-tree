@@ -59,7 +59,7 @@ function App() {
     try {
       const response = await axios.post('/users/api/register/', { email, password });
       setIsAuthenticated(true);
-      setUser(response.data.user);
+      setUser(response.data.user); // Make sure the backend sends user data in the response
       setIsSignUpModalOpen(false);
     } catch (error) {
       console.error('Sign up failed:', error);
