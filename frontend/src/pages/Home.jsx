@@ -18,7 +18,7 @@ function Home({ isAuthenticated, user }) {
     e.preventDefault(); // Prevent default form submission
     try {
       const response = await axios.post(
-        'users/api/submit-form/',
+        '/users/api/submit-form/',
         {
           answer: userInput,
         },

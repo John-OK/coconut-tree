@@ -21,7 +21,7 @@ function App() {
       const sessionToken = getCookie('session_token');
       if (sessionToken) {
         try {
-          const response = await axios.get('users/api/check-session/', {
+          const response = await axios.get('/users/api/check-session/', {
             headers: {
               'X-Session-Token': sessionToken,
             },
