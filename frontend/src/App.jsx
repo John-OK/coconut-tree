@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
-import './App.css'
-import Home from './pages/Home'
-import ResultDisplay from './pages/ResultDisplay'
+import React, { useEffect, useState } from 'react';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import './App.css';
+import Footer from './components/Footer';
 import Navbar from './components/Navbar';
 import SignInModal from './components/SignInModal';
 import SignUpModal from './components/SignUpModal';
+import Home from './pages/Home';
+import ResultDisplay from './pages/ResultDisplay';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -22,8 +23,8 @@ function App() {
         try {
           const response = await axios.get('users/api/check-session/', {
             headers: {
-              'X-Session-Token': sessionToken
-            }
+              'X-Session-Token': sessionToken,
+            },
           });
           setIsAuthenticated(true);
           setUser(response.data.user);
@@ -85,22 +86,25 @@ function App() {
   return (
     <Router>
       <div className="App">
-        <Navbar 
+        <Navbar
           isAuthenticated={isAuthenticated}
           onSignIn={() => setIsSignInModalOpen(true)}
           onSignUp={() => setIsSignUpModalOpen(true)}
           onLogout={handleLogout}
         />
-        <Routes>
-          <Route path="/" element={<Home isAuthenticated={isAuthenticated} user={user} />} />
-          <Route path="/resultDisplay" element={<ResultDisplay />} />
-        </Routes>
-        <SignInModal 
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={<Home isAuthenticated={isAuthenticated} user={user} />} />
+            <Route path="/resultDisplay" element={<ResultDisplay />} />
+          </Routes>
+        </main>
+        <Footer />
+        <SignInModal
           isOpen={isSignInModalOpen}
           onClose={() => setIsSignInModalOpen(false)}
           onSignIn={handleSignIn}
         />
-        <SignUpModal 
+        <SignUpModal
           isOpen={isSignUpModalOpen}
           onClose={() => setIsSignUpModalOpen(false)}
           onSignUp={handleSignUp}
