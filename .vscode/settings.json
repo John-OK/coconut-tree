@@ -1,9 +1,0 @@
-{
-    "Wingman.Ollama": {
-        "codeModel": "codellama:7b-code-q6_K",
-        "chatModel": "llama3.1:8b-instruct-q6_K",
-        "baseUrl": "http://localhost:11434",
-        "apiPath": "/api/generate",
-        "modelInfoPath": "/api/show"
-    }
-}
