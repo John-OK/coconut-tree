@@ -33,7 +33,7 @@ def user_answer(request):
             input_entry.refresh_from_db()
 
             # Get top 100 inputs ordered by count
-            top_inputs = UserInput.objects.order_by('-count')[:100].values('input_text', 'count')
+            top_inputs = UserInput.objects.order_by('-count')[:15].values('input_text', 'count')
 
             return Response({
                 'status': 'success',
