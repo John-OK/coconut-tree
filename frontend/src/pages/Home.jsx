@@ -6,11 +6,14 @@ import "../App.css";
 function Home() {
   const [userInput, setUserInput] = useState("");
   const navigate = useNavigate();
+  const maxLength = 25;
 
   const handleSubmit = async () => {
-    if (userInput.trim() === "" || userInput.length > 25) {
+    if (userInput.trim() === "" || userInput.length > maxLength) {
       // Show an error message to the user
-      alert("Input must not be empty and should be 25 characters or less.");
+      alert(
+        "Input must not be empty and should be ${maxLength} characters or less."
+      );
       return;
     }
 
@@ -22,12 +25,21 @@ function Home() {
       navigate("/resultDisplay", { state: { result: response.data } });
     } catch (error) {
       console.error("Error:", error);
-      // Handle errors (e.g., show error message to user)
+      alert("Sorry. There was an error. Try refreshing your browser.");
     }
   };
 
   const handleInputChange = (event) => {
-    setUserInput(event.target.value); // Store as-is, display will be uppercase
+    const input = event.target.value;
+    if (input.length <= maxLength) {
+      setUserInput(input);
+    }
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter") {
+      handleSubmit();
+    }
   };
 
   return (
@@ -38,8 +50,9 @@ function Home() {
           type="text"
           value={userInput}
           onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
           placeholder="Enter your idea"
-          maxLength={25}
+          maxLength={maxLength}
         />
       </div>
       <h2 className="trumps-text outfit-font">TRUMPS</h2>
