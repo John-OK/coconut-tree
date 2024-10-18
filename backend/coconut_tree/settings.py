@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'coconut_tree_app',
     'users',
+    'printful',
 ]
 
 MIDDLEWARE = [
