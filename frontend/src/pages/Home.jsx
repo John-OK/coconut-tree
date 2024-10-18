@@ -60,14 +60,6 @@ function Home() {
       <button className="submit-button outfit-font" onClick={handleSubmit}>
         Submit
       </button>
-
-      {/* Test for client */}
-      {/* <hr />
-      <h1 className="py-0 my-0trumps-text outfit-font">KEEP</h1>
-      <h1 className="py-0 my-0trumps-text outfit-font">CALM</h1>
-      <h4 className="py-0 my-0trump-text is-size- outfit-font">AND</h4>
-      <h1 className="py-0 my-0trumps-text outfit-font">CARRY</h1>
-      <h1 className="py-0 my-0trumps-text outfit-font">ON</h1> */}
     </div>
   );
 }
