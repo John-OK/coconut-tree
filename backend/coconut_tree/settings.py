@@ -13,13 +13,17 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 from dotenv import load_dotenv
 import os
+import cloudinary
 
 load_dotenv()
 
-
+PRINTFUL_API_TOKEN = os.getenv('PRINTFUL_API_TOKEN')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Fonts directory
+FONTS_DIR = BASE_DIR / 'fonts'
 
 
 # Quick-start development settings - unsuitable for production
@@ -45,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'coconut_tree_app',
     'users',
+    'printful',
 ]
 
 MIDDLEWARE = [
@@ -132,3 +137,44 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+    },
+    # 'loggers': {
+    #     'django': {
+    #         'handlers': ['console'],
+    #         'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+    #         'propagate': False,
+    #     },
+    #     'printful': {
+    #         'handlers': ['console'],
+    #         'level': 'DEBUG',
+    #     },
+    # },
+}
+
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Cloudinary configuration
+CLOUDINARY_CONFIG = {
+    'cloud_name': os.getenv('CLOUDINARY_CLOUD_NAME'),
+    'api_key': os.getenv('CLOUDINARY_API_KEY'),
+    'api_secret': os.getenv('CLOUDINARY_API_SECRET')
+}
+
+cloudinary.config(
+    cloud_name = CLOUDINARY_CONFIG['cloud_name'],
+    api_key = CLOUDINARY_CONFIG['api_key'],
+    api_secret = CLOUDINARY_CONFIG['api_secret']
+)

@@ -164,3 +164,6 @@ cython_debug/
 
 # static files
 backend/static
+
+# Django command files
+**/management/

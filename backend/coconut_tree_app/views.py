@@ -7,6 +7,8 @@ from django.core import serializers
 from django.shortcuts import render
 from django.http import HttpResponse
 
+from printful.views import create_printful_mockup
+
 def send_the_homepage(request):
     print('home')
     theIndex = open('static/index.html').read()
@@ -32,7 +34,14 @@ def user_answer(request):
             # Refresh from db to get the updated count
             input_entry.refresh_from_db()
 
-            # Get top 100 inputs ordered by count
+            # Create Printful mockup
+            mockup_result = create_printful_mockup(input_entry.input_text)
+
+            # Store mockup task information in the database
+            input_entry.mockup_task_key = mockup_result.get('task_key')
+            input_entry.save()
+
+            # Get top 15 inputs ordered by count
             top_inputs = UserInput.objects.order_by('-count')[:15].values('input_text', 'count')
 
             return Response({
@@ -40,7 +49,8 @@ def user_answer(request):
                 'message': 'Answer received and processed',
                 'input': input_entry.input_text,
                 'count': input_entry.count,
-                'top_inputs': list(top_inputs)
+                'top_inputs': list(top_inputs),
+                'mockup_task_key': input_entry.mockup_task_key
             }, status=status.HTTP_200_OK)
 
         except Exception as e:
